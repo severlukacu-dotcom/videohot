@@ -24,9 +24,11 @@ Có thể tuỳ chỉnh qua biến môi trường:
   }
 }
 
-Lưu ý: script cố lấy thời lượng + độ phân giải video bằng ffprobe (nếu máy
-có cài ffmpeg). Nếu không có ffmpeg, các trường đó để trống — trang web vẫn
-chạy bình thường, chỉ là không hiện thời lượng.
+Lưu ý: script cố lấy thời lượng + độ phân giải video bằng ffprobe, và tự
+tách 1 khung hình làm thumbnail bằng ffmpeg (nếu máy có cài ffmpeg và chưa
+có sẵn thumbnail thủ công trong videos/thumbnails/). Nếu không có ffmpeg,
+các trường đó để trống — trang web vẫn chạy bình thường, chỉ là không có
+thời lượng/thumbnail tự động.
 """
 
 import json
@@ -77,6 +79,26 @@ def ffprobe_info(path: Path):
         return None
 
 
+def extract_thumbnail(video_path: Path, out_path: Path, duration_seconds: float) -> bool:
+    """Tách 1 khung hình từ video làm thumbnail bằng ffmpeg. Trả về True nếu thành công."""
+    if not shutil.which("ffmpeg"):
+        return False
+    # Lấy khung hình ở giây thứ 1, hoặc giữa video nếu video ngắn hơn 2s
+    seek = 1.0 if (not duration_seconds or duration_seconds > 2) else duration_seconds / 2
+    try:
+        result = subprocess.run(
+            [
+                "ffmpeg", "-y", "-ss", str(seek), "-i", str(video_path),
+                "-frames:v", "1", "-vf", "scale=640:-1",
+                "-q:v", "3", str(out_path),
+            ],
+            capture_output=True, timeout=30,
+        )
+        return result.returncode == 0 and out_path.exists()
+    except Exception:
+        return False
+
+
 def format_duration(seconds: float) -> str:
     seconds = int(round(seconds))
     m, s = divmod(seconds, 60)
@@ -100,15 +122,24 @@ def main():
         except Exception as e:
             print(f"[Cảnh báo] Không đọc được meta.json: {e}")
 
+    THUMBS_DIR.mkdir(exist_ok=True)
+
     videos = []
     for video_path in video_files:
         override = meta_overrides.get(video_path.name, {})
 
-        thumb_path = THUMBS_DIR / f"{video_path.stem}.jpg"
-        thumbnail = f"{THUMBS_DIR.as_posix()}/{thumb_path.name}" if thumb_path.exists() else ""
-
         probe = ffprobe_info(video_path)
-        duration = format_duration(probe[0]) if probe else ""
+        duration_seconds = probe[0] if probe else 0
+        duration = format_duration(duration_seconds) if probe else ""
+
+        thumb_path = THUMBS_DIR / f"{video_path.stem}.jpg"
+        thumb_status = "có sẵn"
+        if not thumb_path.exists():
+            if extract_thumbnail(video_path, thumb_path, duration_seconds):
+                thumb_status = "tự tách bằng ffmpeg"
+            else:
+                thumb_status = "không tách được (thiếu ffmpeg?)"
+        thumbnail = f"{THUMBS_DIR.as_posix()}/{thumb_path.name}" if thumb_path.exists() else ""
 
         entry = {
             "id": video_path.stem,
@@ -122,7 +153,7 @@ def main():
             "url": f"{VIDEOS_DIR.as_posix()}/{video_path.name}",
         }
         videos.append(entry)
-        print(f"[OK] {video_path.name} -> {entry['title']}" + (f" ({duration})" if duration else " (không có ffprobe, bỏ qua thời lượng)"))
+        print(f"[OK] {video_path.name} -> {entry['title']} | thumbnail: {thumb_status}" + (f" | {duration}" if duration else ""))
 
     OUTPUT.write_text(json.dumps(videos, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\nĐã ghi {len(videos)} video vào {OUTPUT}")

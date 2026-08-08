@@ -26,10 +26,10 @@ jobs:
       - name: Chạy script sinh videos.json
         run: python3 generate_videos_json.py
 
-      - name: Commit videos.json nếu có thay đổi
+      - name: Commit videos.json + thumbnail nếu có thay đổi
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add videos.json
-          git diff --cached --quiet || git commit -m "chore: tự động cập nhật videos.json"
+          git add videos.json videos/thumbnails/
+          git diff --cached --quiet || git commit -m "chore: tự động cập nhật videos.json + thumbnail"
           git push

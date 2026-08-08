@@ -2,166 +2,229 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Reels — Clip ngắn</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clip Hub — Video ngắn</title>
 <meta name="description" content="Kho video ngắn tự quay, lưu trữ ngay trong repo GitHub.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237C5CFC'/%3E%3Cstop offset='1' stop-color='%2333E6B3'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='%230A0B14'/%3E%3Cpolygon points='38,28 74,50 38,72' fill='url(%23g)'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0A0B14; --bg-soft:#10111E;
-    --glass:rgba(255,255,255,0.06); --glass-strong:rgba(255,255,255,0.1); --glass-border:rgba(255,255,255,0.12);
-    --text:#F1F0F8; --muted:#B7B6C9;
-    --accent:#7C5CFC; --mint:#33E6B3;
-    --shadow:0 20px 60px -20px rgba(0,0,0,0.7);
+    --glass:rgba(255,255,255,0.045); --glass-strong:rgba(255,255,255,0.075); --glass-border:rgba(255,255,255,0.09);
+    --text:#F1F0F8; --muted:#8B8AA3;
+    --accent:#7C5CFC; --accent-soft:rgba(124,92,252,0.16);
+    --mint:#33E6B3; --mint-soft:rgba(51,230,179,0.14);
+    --radius:16px; --shadow:0 20px 60px -20px rgba(0,0,0,0.6);
   }
   html[data-theme="light"]{
     --bg:#EFEFF6; --bg-soft:#E5E4F1;
-    --glass:rgba(20,18,40,0.06); --glass-strong:rgba(20,18,40,0.09); --glass-border:rgba(20,18,40,0.14);
+    --glass:rgba(20,18,40,0.045); --glass-strong:rgba(20,18,40,0.07); --glass-border:rgba(20,18,40,0.1);
     --text:#191825; --muted:#5C5A72;
-    --accent:#6845E0; --mint:#0FA57E;
-    --shadow:0 20px 50px -24px rgba(30,20,60,0.3);
+    --accent:#6845E0; --accent-soft:rgba(104,69,224,0.12);
+    --mint:#0FA57E; --mint-soft:rgba(15,165,126,0.12);
+    --shadow:0 20px 50px -24px rgba(30,20,60,0.25);
   }
   @media (prefers-color-scheme: light){
     html:not([data-theme]){
       --bg:#EFEFF6; --bg-soft:#E5E4F1;
-      --glass:rgba(20,18,40,0.06); --glass-strong:rgba(20,18,40,0.09); --glass-border:rgba(20,18,40,0.14);
+      --glass:rgba(20,18,40,0.045); --glass-strong:rgba(20,18,40,0.07); --glass-border:rgba(20,18,40,0.1);
       --text:#191825; --muted:#5C5A72;
-      --accent:#6845E0; --mint:#0FA57E;
-      --shadow:0 20px 50px -24px rgba(30,20,60,0.3);
+      --accent:#6845E0; --accent-soft:rgba(104,69,224,0.12);
+      --mint:#0FA57E; --mint-soft:rgba(15,165,126,0.12);
+      --shadow:0 20px 50px -24px rgba(30,20,60,0.25);
     }
   }
   *{box-sizing:border-box;}
-  html{font-size:100%;}
+  html{scroll-behavior:smooth; font-size:100%;}
   body{
-    margin:0; background:var(--bg); color:var(--text);
-    font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    -webkit-font-smoothing:antialiased; overscroll-behavior-y:none;
+    margin:0;
+    background:
+      radial-gradient(1000px 500px at 85% -10%, var(--accent-soft), transparent 60%),
+      radial-gradient(800px 500px at 5% 15%, var(--mint-soft), transparent 55%),
+      var(--bg);
+    color:var(--text); font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing:antialiased; min-height:100vh;
   }
+  .container{max-width:min(1180px, 94vw); margin:0 auto; padding:0 clamp(16px,3vw,24px);}
   .mono{font-family:'JetBrains Mono', monospace;}
-  button{font-family:inherit; cursor:pointer; border:none; background:none;}
   a{color:inherit;}
+  button{font-family:inherit; cursor:pointer; border:none;}
   ::selection{background:var(--accent); color:#fff;}
 
-  /* ---------- Top bar ---------- */
-  .topbar{
-    position:fixed; top:0; left:0; right:0; z-index:60;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:14px clamp(16px,4vw,28px);
-    background:linear-gradient(rgba(0,0,0,.35), transparent);
-    pointer-events:none;
+  /* ---------- Nav ---------- */
+  .nav-wrap{position:sticky; top:16px; z-index:50; display:flex; justify-content:center; padding:0 16px; margin-bottom:8px;}
+  .nav-wrap.scrolled nav.pill{ box-shadow:0 24px 50px -18px rgba(0,0,0,.55); border-color:rgba(124,92,252,.25); }
+  nav.pill{
+    width:100%; max-width:760px; display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:10px 10px 10px 20px; background:var(--glass-strong); border:1px solid var(--glass-border);
+    border-radius:999px; backdrop-filter:blur(18px) saturate(140%); box-shadow:var(--shadow);
   }
-  .topbar *{pointer-events:auto;}
-  .brand{display:flex; align-items:center; gap:8px; font-family:'Sora',sans-serif; font-weight:700; color:#fff; text-shadow:0 2px 12px rgba(0,0,0,.4);}
-  .brand .dot{width:9px;height:9px;border-radius:3px; background:linear-gradient(135deg,var(--accent),var(--mint)); box-shadow:0 0 12px var(--accent);}
-  .icon-btn{
-    width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    background:rgba(255,255,255,.12); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.18);
-    color:#fff; font-size:16px; transition:.2s;
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700;}
+  .brand .dot{width:10px;height:10px;border-radius:3px; background:linear-gradient(135deg,var(--accent),var(--mint)); box-shadow:0 0 14px var(--accent);}
+  #theme-toggle{
+    width:38px;height:38px;border-radius:50%; border:1px solid var(--glass-border); background:var(--glass);
+    display:flex;align-items:center;justify-content:center; font-size:16px; transition:.2s;
   }
-  .icon-btn:hover{background:rgba(255,255,255,.2);}
+  #theme-toggle:hover{background:var(--glass-strong);}
 
-  /* ---------- Feed ---------- */
-  .feed{
-    height:100vh; height:100dvh; overflow-y:scroll; scroll-snap-type:y mandatory;
-    scrollbar-width:none;
+  /* ---------- Hero ---------- */
+  .hero{padding:clamp(32px,6vw,56px) 0 28px;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px; font-size:12.5px; color:var(--mint); font-weight:600;
+    background:var(--mint-soft); border:1px solid rgba(51,230,179,.25); padding:6px 12px; border-radius:999px; margin-bottom:16px;
   }
-  .feed::-webkit-scrollbar{display:none;}
-  .reel{
-    position:relative; height:100vh; height:100dvh; scroll-snap-align:start;
-    display:flex; align-items:flex-end; justify-content:center; overflow:hidden;
-    background:var(--bg-soft);
-  }
-  .reel video{
-    position:absolute; inset:0; width:100%; height:100%; object-fit:cover; background:#000;
-  }
-  .reel-scrim{
-    position:absolute; inset:0;
-    background:linear-gradient(to top, rgba(0,0,0,.75) 0%, rgba(0,0,0,.15) 45%, transparent 70%);
-    pointer-events:none;
-  }
-  .reel-content{
-    position:relative; z-index:2; width:100%; max-width:640px;
-    padding:0 84px 28px clamp(16px,4vw,28px);
-    color:#fff;
-  }
-  .reel-author{display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:14px; font-weight:600;}
-  .reel-avatar{
-    width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    font-size:12px; font-weight:700; color:#fff; background:linear-gradient(135deg,var(--accent),var(--mint));
-    flex-shrink:0;
-  }
-  .reel-title{font-family:'Sora',sans-serif; font-weight:700; font-size:17px; line-height:1.35; margin:0 0 6px; text-shadow:0 2px 10px rgba(0,0,0,.4);}
-  .reel-caption{font-size:13.5px; color:rgba(255,255,255,.85); line-height:1.5; margin:0;}
-  .reel-meta{display:flex; gap:10px; margin-top:10px; font-size:11.5px; color:rgba(255,255,255,.65);}
-  .reel-meta span{background:rgba(255,255,255,.12); padding:3px 9px; border-radius:999px; backdrop-filter:blur(6px);}
+  .eyebrow::before{content:"●"; font-size:8px;}
+  h2.headline{font-size:clamp(1.9rem, 3.6vw, 2.7rem); line-height:1.1; margin:0 0 12px; font-weight:700; letter-spacing:-.5px;}
+  h2.headline .accent{background:linear-gradient(135deg,var(--accent),var(--mint)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .lede{color:var(--muted); font-size:15.5px; line-height:1.6; max-width:56ch; margin:0;}
 
-  /* ---------- Right action rail ---------- */
-  .reel-actions{
-    position:absolute; right:12px; bottom:100px; z-index:3;
-    display:flex; flex-direction:column; align-items:center; gap:18px;
+  /* ---------- Toolbar ---------- */
+  .toolbar{display:flex; gap:10px; margin:26px 0 18px; flex-wrap:wrap;}
+  .search-box{
+    flex:1; min-width:220px; display:flex; align-items:center; gap:8px;
+    background:var(--glass); border:1px solid var(--glass-border); border-radius:12px; padding:10px 14px;
   }
-  .action-btn{
-    width:46px; height:46px; border-radius:50%;
-    background:rgba(255,255,255,.12); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.18);
-    display:flex; align-items:center; justify-content:center; font-size:20px; color:#fff;
-    transition:transform .15s ease;
-  }
-  .action-btn:active{transform:scale(0.88);}
-  .action-btn.liked{background:rgba(255,71,133,.25); border-color:rgba(255,71,133,.5); color:#FF4785;}
-  .action-count{font-size:11px; color:#fff; margin-top:4px; text-shadow:0 1px 6px rgba(0,0,0,.5); font-weight:600;}
+  .search-box input{border:none; background:transparent; outline:none; color:var(--text); font-size:14px; width:100%;}
+  .search-box input::placeholder{color:var(--muted);}
+  .result-count{font-size:12.5px; color:var(--muted); margin:0 0 16px;}
 
-  /* ---------- Progress bar ---------- */
-  .reel-progress{
-    position:absolute; left:0; right:0; bottom:0; height:3px; z-index:3;
-    background:rgba(255,255,255,.2);
+  /* ---------- Video grid (16:9 cards) ---------- */
+  .video-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:18px; padding-bottom:60px;}
+  .video-card{
+    background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--radius); overflow:hidden;
+    cursor:pointer; transition:transform .2s, border-color .2s, box-shadow .2s;
+    opacity:0; transform:translateY(14px); animation:cardIn .5s ease forwards;
+    -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; touch-action:manipulation;
   }
-  .reel-progress-fill{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--mint)); transition:width .1s linear;}
-
-  .tap-layer{position:absolute; inset:0; z-index:1;}
-
-  .unmute-hint{
-    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:4;
-    background:rgba(0,0,0,.5); color:#fff; padding:10px 18px; border-radius:999px;
-    font-size:13px; display:flex; align-items:center; gap:6px; opacity:0; transition:opacity .3s; pointer-events:none;
+  @keyframes cardIn{ to{ opacity:1; transform:translateY(0); } }
+  .video-card:hover{transform:translateY(-3px); border-color:rgba(124,92,252,.4); box-shadow:0 16px 40px -18px rgba(124,92,252,.35);}
+  .video-thumb{position:relative; width:100%; aspect-ratio:16/9; background:#000; overflow:hidden;}
+  .video-thumb img, .video-thumb video{width:100%; height:100%; object-fit:cover; display:block;}
+  .preview-video{
+    position:absolute; inset:0; opacity:0; transition:opacity .25s ease; pointer-events:none;
   }
-  .unmute-hint.show{opacity:1;}
-
-  /* ---------- Skeleton / loading ---------- */
-  .loading-screen{
-    position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:14px; background:var(--bg); color:var(--muted); z-index:100;
+  .preview-video.show{opacity:1;}
+  .video-thumb-fallback{
+    width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg, var(--accent-soft), var(--mint-soft));
+    font-size:34px; color:var(--text);
   }
-  .loading-dot{width:10px;height:10px;border-radius:50%; background:var(--accent); animation:pulse 1s ease-in-out infinite;}
-  @keyframes pulse{0%,100%{opacity:.3; transform:scale(.8);} 50%{opacity:1; transform:scale(1);}}
+  .video-duration{
+    position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,.72); color:#fff;
+    font-size:11px; font-weight:600; padding:2px 7px; border-radius:6px;
+  }
+
+  .video-info{padding:12px 14px 14px; display:flex; gap:10px;}
+  .video-avatar{
+    width:34px; height:34px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    font-size:12.5px; font-weight:700; color:#fff;
+  }
+  .video-title{font-weight:600; font-size:14.5px; line-height:1.35; margin:0 0 4px;}
+  .video-meta{font-size:12px; color:var(--muted);}
 
   .empty-state{
-    position:fixed; inset:0; display:flex; align-items:center; justify-content:center; text-align:center;
-    padding:32px; color:var(--muted); background:var(--bg); z-index:100;
+    grid-column:1/-1; text-align:center; padding:50px 20px; color:var(--muted);
+    border:1px dashed var(--glass-border); border-radius:16px;
   }
-  .empty-state .box{max-width:420px; font-size:14px; line-height:1.7;}
   .empty-state code{background:var(--glass); padding:2px 6px; border-radius:6px; font-family:'JetBrains Mono',monospace; color:var(--text);}
 
+  /* ---------- Lightbox player ---------- */
+  .lightbox{
+    position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center;
+    background:rgba(6,6,12,.85); backdrop-filter:blur(6px); padding:24px;
+  }
+  .lightbox.open{display:flex;}
+  .lightbox-panel{
+    width:100%; max-width:920px; background:var(--bg-soft); border:1px solid var(--glass-border);
+    border-radius:18px; overflow:hidden; box-shadow:var(--shadow);
+  }
+  .lightbox-video-wrap{width:100%; aspect-ratio:16/9; background:#000;}
+  .lightbox-video-wrap video{width:100%; height:100%; display:block;}
+  .lightbox-body{padding:18px 22px 22px; display:flex; flex-direction:column; gap:10px;}
+  .lightbox-top{display:flex; justify-content:space-between; align-items:flex-start; gap:14px;}
+  .lightbox-title{font-family:'Sora',sans-serif; font-weight:700; font-size:18px; margin:0;}
+  .lightbox-close{
+    width:34px; height:34px; border-radius:50%; background:var(--glass); border:1px solid var(--glass-border);
+    color:var(--text); font-size:16px; flex-shrink:0;
+  }
+  .lightbox-author{display:flex; align-items:center; gap:10px; font-size:13.5px; color:var(--muted);}
+  .lightbox-caption{font-size:13.5px; color:var(--muted); line-height:1.6; margin:0;}
+  .lightbox-actions{display:flex; gap:10px; margin-top:4px;}
+  .lb-btn{
+    display:flex; align-items:center; gap:6px; padding:9px 16px; border-radius:10px; font-size:13px; font-weight:600;
+    background:var(--glass); border:1px solid var(--glass-border); color:var(--text); transition:.2s;
+  }
+  .lb-btn:hover{background:var(--glass-strong);}
+  .lb-btn.liked{background:rgba(255,71,133,.15); border-color:rgba(255,71,133,.4); color:#FF4785;}
+
+  @media (max-width:640px){
+    .video-grid{grid-template-columns:1fr 1fr; gap:10px;}
+    .video-info{padding:8px 4px 4px;}
+    .video-title{font-size:12.5px;}
+    .video-avatar{width:26px;height:26px;font-size:10px;}
+    .lightbox{padding:0;}
+    .lightbox-panel{border-radius:0; max-width:none; height:100%; display:flex; flex-direction:column;}
+    .lightbox-video-wrap{aspect-ratio:auto; flex:0 0 auto; max-height:38vh;}
+    .lightbox-body{overflow-y:auto;}
+  }
   @media (prefers-reduced-motion: reduce){
-    .loading-dot{animation:none;}
+    .video-card{animation:none; opacity:1; transform:none;}
   }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="brand"><span class="dot"></span> Reels</div>
-  <button id="theme-toggle" class="icon-btn" aria-label="Chuyển giao diện sáng / tối">🌙</button>
+<div class="nav-wrap">
+  <nav class="pill">
+    <div class="brand"><span class="dot"></span> Clip Hub</div>
+    <button id="theme-toggle" aria-label="Chuyển giao diện sáng / tối">🌙</button>
+  </nav>
 </div>
 
-<div id="loading-screen" class="loading-screen">
-  <div class="loading-dot"></div>
-  <div>Đang tải video…</div>
-</div>
+<main class="container">
+  <section class="hero">
+    <span class="eyebrow">Video ngắn · lưu trong repo</span>
+    <h2 class="headline">Kho <span class="accent">video ngắn</span> tự quay</h2>
+    <p class="lede">Duyệt video dạng lưới, bấm vào để xem — mọi file được lưu trực tiếp trong repo GitHub.</p>
+  </section>
 
-<div class="feed" id="feed" style="display:none;"></div>
+  <div class="toolbar">
+    <div class="search-box">
+      <span aria-hidden="true">🔍</span>
+      <input type="text" id="search-input" placeholder="Tìm video theo tên...">
+    </div>
+  </div>
+  <p class="result-count" id="result-count"></p>
+
+  <div class="video-grid" id="video-grid"></div>
+</main>
+
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-panel">
+    <div class="lightbox-video-wrap">
+      <video id="lightbox-video" controls playsinline></video>
+    </div>
+    <div class="lightbox-body">
+      <div class="lightbox-top">
+        <h3 class="lightbox-title" id="lightbox-title"></h3>
+        <button class="lightbox-close" id="lightbox-close" aria-label="Đóng">✕</button>
+      </div>
+      <div class="lightbox-author">
+        <span class="video-avatar" id="lightbox-avatar" style="width:26px;height:26px;font-size:10.5px;"></span>
+        <span id="lightbox-author-name"></span>
+        <span>·</span>
+        <span id="lightbox-meta"></span>
+      </div>
+      <p class="lightbox-caption" id="lightbox-caption"></p>
+      <div class="lightbox-actions">
+        <button class="lb-btn" id="lightbox-like">❤ <span id="lightbox-like-count">0</span></button>
+        <button class="lb-btn" id="lightbox-share">↗ Sao chép link</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -169,189 +232,215 @@
   const root = document.documentElement;
   const toggleBtn = document.getElementById('theme-toggle');
   const lightQuery = window.matchMedia('(prefers-color-scheme: light)');
-
   function applyTheme(mode){
     root.setAttribute('data-theme', mode);
     toggleBtn.textContent = mode === 'light' ? '☀️' : '🌙';
   }
-  function getManualChoice(){
-    try { return localStorage.getItem('reels-theme'); } catch(e){ return null; }
-  }
+  function getManualChoice(){ try { return localStorage.getItem('cliphub-theme'); } catch(e){ return null; } }
   applyTheme(getManualChoice() || (lightQuery.matches ? 'light' : 'dark'));
-  lightQuery.addEventListener('change', (e) => {
-    if(!getManualChoice()){ applyTheme(e.matches ? 'light' : 'dark'); }
-  });
+  lightQuery.addEventListener('change', (e) => { if(!getManualChoice()){ applyTheme(e.matches ? 'light' : 'dark'); } });
   toggleBtn.addEventListener('click', () => {
     const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
     applyTheme(next);
-    try { localStorage.setItem('reels-theme', next); } catch(e){}
+    try { localStorage.setItem('cliphub-theme', next); } catch(e){}
   });
 
-  // ---------- Liked state (local only — no backend, so counts are per-browser) ----------
-  function getLikedSet(){
-    try { return new Set(JSON.parse(localStorage.getItem('reels-liked') || '[]')); }
-    catch(e){ return new Set(); }
-  }
-  function saveLikedSet(set){
-    try { localStorage.setItem('reels-liked', JSON.stringify([...set])); } catch(e){}
-  }
+  const navWrap = document.querySelector('.nav-wrap');
+  window.addEventListener('scroll', () => { navWrap.classList.toggle('scrolled', window.scrollY > 12); }, { passive:true });
 
+  // ---------- Liked state (local only) ----------
+  function getLikedSet(){ try { return new Set(JSON.parse(localStorage.getItem('cliphub-liked') || '[]')); } catch(e){ return new Set(); } }
+  function saveLikedSet(set){ try { localStorage.setItem('cliphub-liked', JSON.stringify([...set])); } catch(e){} }
+
+  const palette = ['#7C5CFC','#33E6B3','#FFB86B','#22C1DC','#FF6B6B','#9C6BFF','#5A3FE0'];
+  function colorFor(str){
+    let hash = 0;
+    for(let i=0;i<str.length;i++){ hash = str.charCodeAt(i) + ((hash<<5)-hash); }
+    return palette[Math.abs(hash) % palette.length];
+  }
   function initialsFor(name){
     const words = (name || '?').trim().split(/\s+/).filter(Boolean);
     if(words.length === 1) return words[0].slice(0,2).toUpperCase();
     return (words[0][0] + words[1][0]).toUpperCase();
   }
 
-  const feed = document.getElementById('feed');
-  const loadingScreen = document.getElementById('loading-screen');
+  const grid = document.getElementById('video-grid');
+  const searchInput = document.getElementById('search-input');
+  const resultCount = document.getElementById('result-count');
+  let allVideos = [];
 
-  function showEmptyState(){
-    loadingScreen.style.display = 'none';
-    document.body.insertAdjacentHTML('beforeend', `
-      <div class="empty-state">
-        <div class="box">
-          Chưa tìm thấy <code>videos.json</code> ở gốc repo.<br><br>
-          Đặt file <code>.mp4</code> vào thư mục <code>videos/</code> rồi chạy
-          <code>python3 generate_videos_json.py</code> (hoặc để GitHub Action tự chạy)
-          để sinh file này.
-        </div>
-      </div>
-    `);
-  }
+  function renderGrid(){
+    const q = searchInput.value.trim().toLowerCase();
+    const filtered = allVideos.filter(v => !q || v.title.toLowerCase().includes(q));
 
-  function buildReel(v, index){
-    const liked = getLikedSet().has(v.id);
-    const wrapper = document.createElement('div');
-    wrapper.className = 'reel';
-    wrapper.innerHTML = `
-      <video src="${v.url}" ${v.thumbnail ? `poster="${v.thumbnail}"` : ''} loop muted playsinline preload="metadata"></video>
-      <div class="reel-scrim"></div>
-      <div class="tap-layer" data-role="tap"></div>
-      <div class="unmute-hint" data-role="hint">🔇 Chạm để bật tiếng</div>
-      <div class="reel-progress"><div class="reel-progress-fill" data-role="progress"></div></div>
-
-      <div class="reel-content">
-        <div class="reel-author">
-          <span class="reel-avatar">${initialsFor(v.author)}</span>
-          <span>@${v.author || 'quocchienn'}</span>
-        </div>
-        <p class="reel-title">${v.title}</p>
-        ${v.caption ? `<p class="reel-caption">${v.caption}</p>` : ''}
-        <div class="reel-meta">
-          ${v.duration ? `<span>${v.duration}</span>` : ''}
-          ${v.size ? `<span>${v.size}</span>` : ''}
-        </div>
-      </div>
-
-      <div class="reel-actions">
-        <div style="display:flex; flex-direction:column; align-items:center;">
-          <button class="action-btn ${liked ? 'liked' : ''}" data-role="like">❤</button>
-          <span class="action-count" data-role="like-count">${v.likes + (liked ? 1 : 0)}</span>
-        </div>
-        <div style="display:flex; flex-direction:column; align-items:center;">
-          <button class="action-btn" data-role="mute">🔇</button>
-        </div>
-        <div style="display:flex; flex-direction:column; align-items:center;">
-          <button class="action-btn" data-role="share">↗</button>
-        </div>
-      </div>
-    `;
-
-    const video = wrapper.querySelector('video');
-    const tapLayer = wrapper.querySelector('[data-role="tap"]');
-    const hint = wrapper.querySelector('[data-role="hint"]');
-    const progress = wrapper.querySelector('[data-role="progress"]');
-    const likeBtn = wrapper.querySelector('[data-role="like"]');
-    const likeCount = wrapper.querySelector('[data-role="like-count"]');
-    const muteBtn = wrapper.querySelector('[data-role="mute"]');
-    const shareBtn = wrapper.querySelector('[data-role="share"]');
-
-    video.muted = true;
-    muteBtn.textContent = '🔇';
-
-    function toggleMute(){
-      video.muted = !video.muted;
-      muteBtn.textContent = video.muted ? '🔇' : '🔊';
-      if(!video.muted){
-        hint.classList.remove('show');
-      }
-    }
-    tapLayer.addEventListener('click', () => {
-      if(video.paused){ video.play().catch(()=>{}); } else { toggleMute(); }
-    });
-    muteBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleMute(); });
-
-    likeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const liked = getLikedSet();
-      const isLiked = liked.has(v.id);
-      if(isLiked){ liked.delete(v.id); likeBtn.classList.remove('liked'); }
-      else { liked.add(v.id); likeBtn.classList.add('liked'); }
-      saveLikedSet(liked);
-      likeCount.textContent = v.likes + (liked.has(v.id) ? 1 : 0);
-    });
-
-    shareBtn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const url = window.location.origin + window.location.pathname + '#' + v.id;
-      try {
-        await navigator.clipboard.writeText(url);
-        shareBtn.textContent = '✓';
-        setTimeout(() => { shareBtn.textContent = '↗'; }, 1400);
-      } catch(err){}
-    });
-
-    video.addEventListener('timeupdate', () => {
-      if(video.duration){ progress.style.width = (video.currentTime / video.duration * 100) + '%'; }
-    });
-
-    wrapper.dataset.videoId = v.id;
-    wrapper._video = video;
-    wrapper._hint = hint;
-    return wrapper;
-  }
-
-  async function init(){
-    let videos = [];
-    try {
-      const res = await fetch('./videos.json', { cache:'no-store' });
-      if(res.ok){ videos = await res.json(); }
-    } catch(e){}
-
-    if(!Array.isArray(videos) || videos.length === 0){
-      showEmptyState();
+    if(filtered.length === 0){
+      grid.innerHTML = allVideos.length
+        ? '<div class="empty-state">Không tìm thấy video phù hợp.</div>'
+        : `<div class="empty-state">
+            Chưa tìm thấy <code>videos.json</code> ở gốc repo.<br><br>
+            Đặt file <code>.mp4</code> vào thư mục <code>videos/</code> rồi chạy
+            <code>python3 generate_videos_json.py</code> (hoặc để GitHub Action tự chạy).
+          </div>`;
+      resultCount.textContent = allVideos.length ? '0 video phù hợp' : '';
       return;
     }
 
-    videos.forEach((v, i) => feed.appendChild(buildReel(v, i)));
-    loadingScreen.style.display = 'none';
-    feed.style.display = 'block';
+    resultCount.textContent = `${filtered.length} video`;
 
-    // Autoplay the video currently in view; pause the rest
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        const video = entry.target._video;
-        const hint = entry.target._hint;
-        if(entry.isIntersecting && entry.intersectionRatio > 0.6){
-          video.play().catch(() => {
-            // Autoplay with sound blocked by browser — show hint to unmute/tap
-            hint.classList.add('show');
-          });
-        } else {
-          video.pause();
-        }
+    grid.innerHTML = filtered.map((v, i) => `
+      <div class="video-card" style="animation-delay:${Math.min(i,12)*40}ms" data-id="${v.id}">
+        <div class="video-thumb">
+          ${v.thumbnail
+            ? `<img src="${v.thumbnail}" alt="" loading="lazy">`
+            : `<div class="video-thumb-fallback">🎬</div>`
+          }
+          <video class="preview-video" muted loop playsinline webkit-playsinline preload="none" data-src="${v.url}"></video>
+          ${v.duration ? `<span class="video-duration">${v.duration}</span>` : ''}
+        </div>
+        <div class="video-info">
+          <div class="video-avatar" style="background:${colorFor(v.author || v.title)}">${initialsFor(v.author)}</div>
+          <div>
+            <p class="video-title">${v.title}</p>
+            <div class="video-meta">${v.author || 'quocchienn'} · ${v.likes || 0} lượt thích${v.size ? ' · ' + v.size : ''}</div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('.video-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if(card.dataset.suppressClick === '1'){ card.dataset.suppressClick = '0'; return; }
+        openLightbox(card.dataset.id);
       });
-    }, { threshold: [0, 0.6, 1] });
+      attachPreview(card);
+    });
+  }
 
-    document.querySelectorAll('.reel').forEach(reel => observer.observe(reel));
+  // ---------- Hover (desktop) / long-press (touch) preview ----------
+  const PREVIEW_SECONDS = 4; // chỉ demo vài giây đầu, không phát hết cả video
+  function attachPreview(card){
+    const video = card.querySelector('.preview-video');
+    if(!video) return;
+    let hoverTimer = null;
+    let longPressTimer = null;
+    let previewing = false;
 
-    // Deep-link to a specific video via #id
+    function startPreview(){
+      if(previewing) return;
+      previewing = true;
+      if(!video.src) video.src = video.dataset.src;
+      video.currentTime = 0;
+      video.play().catch(() => {});
+      video.classList.add('show');
+    }
+    function stopPreview(){
+      if(!previewing) return;
+      previewing = false;
+      video.pause();
+      video.classList.remove('show');
+    }
+    video.addEventListener('timeupdate', () => {
+      if(video.currentTime >= PREVIEW_SECONDS){ video.currentTime = 0; }
+    });
+
+    // Desktop hover
+    card.addEventListener('mouseenter', () => { hoverTimer = setTimeout(startPreview, 100); });
+    card.addEventListener('mouseleave', () => { clearTimeout(hoverTimer); stopPreview(); });
+
+    // Touch: chỉ cần chạm nhẹ là phát preview ngay, không cần giữ lâu
+    card.addEventListener('touchstart', () => {
+      card.dataset.suppressClick = '0';
+      longPressTimer = setTimeout(() => {
+        startPreview();
+        card.dataset.suppressClick = '1';
+      }, 100);
+    }, { passive:true });
+    card.addEventListener('touchmove', () => { clearTimeout(longPressTimer); });
+    card.addEventListener('touchend', () => {
+      clearTimeout(longPressTimer);
+      if(previewing) stopPreview();
+    });
+  }
+
+  // ---------- Lightbox ----------
+  const lightbox = document.getElementById('lightbox');
+  const lbVideo = document.getElementById('lightbox-video');
+  const lbTitle = document.getElementById('lightbox-title');
+  const lbAvatar = document.getElementById('lightbox-avatar');
+  const lbAuthorName = document.getElementById('lightbox-author-name');
+  const lbMeta = document.getElementById('lightbox-meta');
+  const lbCaption = document.getElementById('lightbox-caption');
+  const lbLike = document.getElementById('lightbox-like');
+  const lbLikeCount = document.getElementById('lightbox-like-count');
+  const lbShare = document.getElementById('lightbox-share');
+  const lbClose = document.getElementById('lightbox-close');
+
+  function openLightbox(id){
+    const v = allVideos.find(x => x.id === id);
+    if(!v) return;
+
+    lbVideo.src = v.url;
+    if(v.thumbnail) lbVideo.poster = v.thumbnail;
+    lbTitle.textContent = v.title;
+    lbAvatar.textContent = initialsFor(v.author);
+    lbAvatar.style.background = colorFor(v.author || v.title);
+    lbAuthorName.textContent = v.author || 'quocchienn';
+    lbMeta.textContent = [v.duration, v.size].filter(Boolean).join(' · ');
+    lbCaption.textContent = v.caption || '';
+    lbCaption.style.display = v.caption ? 'block' : 'none';
+
+    const liked = getLikedSet().has(v.id);
+    lbLike.classList.toggle('liked', liked);
+    lbLikeCount.textContent = (v.likes || 0) + (liked ? 1 : 0);
+    lbLike.onclick = () => {
+      const set = getLikedSet();
+      const isLiked = set.has(v.id);
+      if(isLiked){ set.delete(v.id); } else { set.add(v.id); }
+      saveLikedSet(set);
+      lbLike.classList.toggle('liked', !isLiked);
+      lbLikeCount.textContent = (v.likes || 0) + (!isLiked ? 1 : 0);
+    };
+    lbShare.onclick = async () => {
+      const url = window.location.origin + window.location.pathname + '#' + v.id;
+      try {
+        await navigator.clipboard.writeText(url);
+        lbShare.textContent = '✓ Đã copy';
+        setTimeout(() => { lbShare.innerHTML = '↗ Sao chép link'; }, 1500);
+      } catch(e){}
+    };
+
+    lightbox.classList.add('open');
+    lbVideo.play().catch(() => {});
+    history.replaceState(null, '', '#' + v.id);
+  }
+
+  function closeLightbox(){
+    lightbox.classList.remove('open');
+    lbVideo.pause();
+    lbVideo.removeAttribute('src');
+    lbVideo.load();
+    history.replaceState(null, '', window.location.pathname);
+  }
+
+  lbClose.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', (e) => { if(e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeLightbox(); });
+
+  async function init(){
+    try {
+      const res = await fetch('./videos.json', { cache:'no-store' });
+      if(res.ok){ allVideos = await res.json(); }
+    } catch(e){}
+    if(!Array.isArray(allVideos)) allVideos = [];
+    renderGrid();
+
     if(location.hash){
-      const target = document.querySelector(`.reel[data-video-id="${location.hash.slice(1)}"]`);
-      if(target){ target.scrollIntoView(); }
+      const id = location.hash.slice(1);
+      if(allVideos.some(v => v.id === id)) openLightbox(id);
     }
   }
 
+  searchInput.addEventListener('input', renderGrid);
   init();
 })();
 </script>

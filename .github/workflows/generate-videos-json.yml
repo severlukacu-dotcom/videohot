@@ -1,0 +1,35 @@
+# Đặt file này vào: .github/workflows/generate-videos-json.yml
+# Tự động chạy generate_videos_json.py mỗi khi có thay đổi trong thư mục videos/,
+# rồi commit lại videos.json vào cùng nhánh.
+
+name: Generate videos.json
+
+on:
+  push:
+    paths:
+      - "videos/**"
+      - "generate_videos_json.py"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cài ffmpeg (để đọc thời lượng/độ phân giải video)
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Chạy script sinh videos.json
+        run: python3 generate_videos_json.py
+
+      - name: Commit videos.json nếu có thay đổi
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add videos.json
+          git diff --cached --quiet || git commit -m "chore: tự động cập nhật videos.json"
+          git push

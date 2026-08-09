@@ -115,17 +115,6 @@
     position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,.72); color:#fff;
     font-size:11px; font-weight:600; padding:2px 7px; border-radius:6px;
   }
-  .play-overlay{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    background:rgba(0,0,0,0); transition:background .2s;
-  }
-  .video-card:hover .play-overlay{background:rgba(0,0,0,.15);}
-  .play-overlay span{
-    width:52px; height:52px; border-radius:50%; background:rgba(255,255,255,.92); color:#111;
-    display:flex; align-items:center; justify-content:center; font-size:18px; opacity:0; transform:scale(.8);
-    transition:opacity .2s, transform .2s;
-  }
-  .video-card:hover .play-overlay span{opacity:1; transform:scale(1);}
 
   .video-info{padding:12px 14px 14px; display:flex; gap:10px;}
   .video-avatar{
@@ -306,7 +295,6 @@
             : `<div class="video-thumb-fallback">🎬</div>`
           }
           <video class="preview-video" muted loop playsinline webkit-playsinline preload="none" data-src="${v.url}"></video>
-          <div class="play-overlay"><span>▶</span></div>
           ${v.duration ? `<span class="video-duration">${v.duration}</span>` : ''}
         </div>
         <div class="video-info">
@@ -356,16 +344,16 @@
     });
 
     // Desktop hover
-    card.addEventListener('mouseenter', () => { hoverTimer = setTimeout(startPreview, 300); });
+    card.addEventListener('mouseenter', () => { hoverTimer = setTimeout(startPreview, 100); });
     card.addEventListener('mouseleave', () => { clearTimeout(hoverTimer); stopPreview(); });
 
-    // Touch: giữ nhẹ (long-press) để xem trước, chạm nhanh vẫn mở video đầy đủ
+    // Touch: chỉ cần chạm nhẹ là phát preview ngay, không cần giữ lâu
     card.addEventListener('touchstart', () => {
       card.dataset.suppressClick = '0';
       longPressTimer = setTimeout(() => {
         startPreview();
         card.dataset.suppressClick = '1';
-      }, 400);
+      }, 100);
     }, { passive:true });
     card.addEventListener('touchmove', () => { clearTimeout(longPressTimer); });
     card.addEventListener('touchend', () => {

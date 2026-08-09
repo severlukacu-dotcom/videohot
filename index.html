@@ -139,6 +139,18 @@
   }
   .empty-state code{background:var(--glass); padding:2px 6px; border-radius:6px; font-family:'JetBrains Mono',monospace; color:var(--text);}
 
+  .skeleton-card{
+    aspect-ratio:16/9; border-radius:var(--radius); background:var(--glass); border:1px solid var(--glass-border);
+    position:relative; overflow:hidden;
+  }
+  .skeleton-shine{
+    position:absolute; inset:0;
+    background:linear-gradient(90deg, transparent, var(--glass-strong), transparent);
+    background-size:200% 100%; animation:shine 1.4s ease-in-out infinite;
+  }
+  @keyframes shine{ 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+  @media (prefers-reduced-motion: reduce){ .skeleton-shine{animation:none;} }
+
   /* ---------- Lightbox player ---------- */
   .lightbox{
     position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center;
@@ -166,7 +178,6 @@
     background:var(--glass); border:1px solid var(--glass-border); color:var(--text); transition:.2s;
   }
   .lb-btn:hover{background:var(--glass-strong);}
-  .lb-btn.liked{background:rgba(255,71,133,.15); border-color:rgba(255,71,133,.4); color:#FF4785;}
 
   @media (max-width:640px){
     .video-grid{grid-template-columns:1fr 1fr; gap:10px;}
@@ -228,7 +239,6 @@
       </div>
       <p class="lightbox-caption" id="lightbox-caption"></p>
       <div class="lightbox-actions">
-        <button class="lb-btn" id="lightbox-like">❤ <span id="lightbox-like-count">0</span></button>
         <button class="lb-btn" id="lightbox-share">↗ Sao chép link</button>
       </div>
     </div>
@@ -256,10 +266,6 @@
 
   const navWrap = document.querySelector('.nav-wrap');
   window.addEventListener('scroll', () => { navWrap.classList.toggle('scrolled', window.scrollY > 12); }, { passive:true });
-
-  // ---------- Liked state (local only) ----------
-  function getLikedSet(){ try { return new Set(JSON.parse(localStorage.getItem('cliphub-liked') || '[]')); } catch(e){ return new Set(); } }
-  function saveLikedSet(set){ try { localStorage.setItem('cliphub-liked', JSON.stringify([...set])); } catch(e){} }
 
   const palette = ['#7C5CFC','#33E6B3','#FFB86B','#22C1DC','#FF6B6B','#9C6BFF','#5A3FE0'];
   function colorFor(str){
@@ -378,8 +384,6 @@
   const lbAuthorName = document.getElementById('lightbox-author-name');
   const lbMeta = document.getElementById('lightbox-meta');
   const lbCaption = document.getElementById('lightbox-caption');
-  const lbLike = document.getElementById('lightbox-like');
-  const lbLikeCount = document.getElementById('lightbox-like-count');
   const lbShare = document.getElementById('lightbox-share');
   const lbClose = document.getElementById('lightbox-close');
 
@@ -397,17 +401,6 @@
     lbCaption.textContent = v.caption || '';
     lbCaption.style.display = v.caption ? 'block' : 'none';
 
-    const liked = getLikedSet().has(v.id);
-    lbLike.classList.toggle('liked', liked);
-    lbLikeCount.textContent = (v.likes || 0) + (liked ? 1 : 0);
-    lbLike.onclick = () => {
-      const set = getLikedSet();
-      const isLiked = set.has(v.id);
-      if(isLiked){ set.delete(v.id); } else { set.add(v.id); }
-      saveLikedSet(set);
-      lbLike.classList.toggle('liked', !isLiked);
-      lbLikeCount.textContent = (v.likes || 0) + (!isLiked ? 1 : 0);
-    };
     lbShare.onclick = async () => {
       const url = window.location.origin + window.location.pathname + '#' + v.id;
       try {
@@ -434,7 +427,15 @@
   lightbox.addEventListener('click', (e) => { if(e.target === lightbox) closeLightbox(); });
   document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeLightbox(); });
 
+  function renderSkeleton(n){
+    grid.innerHTML = Array.from({length:n}).map(() => `
+      <div class="skeleton-card"><div class="skeleton-shine"></div></div>
+    `).join('');
+    resultCount.textContent = '';
+  }
+
   async function init(){
+    renderSkeleton(6);
     try {
       const res = await fetch('./videos.json', { cache:'no-store' });
       if(res.ok){ allVideos = await res.json(); }

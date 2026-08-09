@@ -96,6 +96,7 @@
     background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--radius); overflow:hidden;
     cursor:pointer; transition:transform .2s, border-color .2s, box-shadow .2s;
     opacity:0; transform:translateY(14px); animation:cardIn .5s ease forwards;
+    -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; touch-action:manipulation;
   }
   @keyframes cardIn{ to{ opacity:1; transform:translateY(0); } }
   .video-card:hover{transform:translateY(-3px); border-color:rgba(124,92,252,.4); box-shadow:0 16px 40px -18px rgba(124,92,252,.35);}
@@ -304,7 +305,7 @@
             ? `<img src="${v.thumbnail}" alt="" loading="lazy">`
             : `<div class="video-thumb-fallback">🎬</div>`
           }
-          <video class="preview-video" muted loop playsinline preload="none" data-src="${v.url}"></video>
+          <video class="preview-video" muted loop playsinline webkit-playsinline preload="none" data-src="${v.url}"></video>
           <div class="play-overlay"><span>▶</span></div>
           ${v.duration ? `<span class="video-duration">${v.duration}</span>` : ''}
         </div>

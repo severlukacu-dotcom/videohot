@@ -101,6 +101,10 @@
   .video-card:hover{transform:translateY(-3px); border-color:rgba(124,92,252,.4); box-shadow:0 16px 40px -18px rgba(124,92,252,.35);}
   .video-thumb{position:relative; width:100%; aspect-ratio:16/9; background:#000; overflow:hidden;}
   .video-thumb img, .video-thumb video{width:100%; height:100%; object-fit:cover; display:block;}
+  .preview-video{
+    position:absolute; inset:0; opacity:0; transition:opacity .25s ease; pointer-events:none;
+  }
+  .preview-video.show{opacity:1;}
   .video-thumb-fallback{
     width:100%; height:100%; display:flex; align-items:center; justify-content:center;
     background:linear-gradient(135deg, var(--accent-soft), var(--mint-soft));
@@ -300,6 +304,7 @@
             ? `<img src="${v.thumbnail}" alt="" loading="lazy">`
             : `<div class="video-thumb-fallback">🎬</div>`
           }
+          <video class="preview-video" muted loop playsinline preload="none" data-src="${v.url}"></video>
           <div class="play-overlay"><span>▶</span></div>
           ${v.duration ? `<span class="video-duration">${v.duration}</span>` : ''}
         </div>
@@ -314,7 +319,57 @@
     `).join('');
 
     grid.querySelectorAll('.video-card').forEach(card => {
-      card.addEventListener('click', () => openLightbox(card.dataset.id));
+      card.addEventListener('click', (e) => {
+        if(card.dataset.suppressClick === '1'){ card.dataset.suppressClick = '0'; return; }
+        openLightbox(card.dataset.id);
+      });
+      attachPreview(card);
+    });
+  }
+
+  // ---------- Hover (desktop) / long-press (touch) preview ----------
+  const PREVIEW_SECONDS = 4; // chỉ demo vài giây đầu, không phát hết cả video
+  function attachPreview(card){
+    const video = card.querySelector('.preview-video');
+    if(!video) return;
+    let hoverTimer = null;
+    let longPressTimer = null;
+    let previewing = false;
+
+    function startPreview(){
+      if(previewing) return;
+      previewing = true;
+      if(!video.src) video.src = video.dataset.src;
+      video.currentTime = 0;
+      video.play().catch(() => {});
+      video.classList.add('show');
+    }
+    function stopPreview(){
+      if(!previewing) return;
+      previewing = false;
+      video.pause();
+      video.classList.remove('show');
+    }
+    video.addEventListener('timeupdate', () => {
+      if(video.currentTime >= PREVIEW_SECONDS){ video.currentTime = 0; }
+    });
+
+    // Desktop hover
+    card.addEventListener('mouseenter', () => { hoverTimer = setTimeout(startPreview, 300); });
+    card.addEventListener('mouseleave', () => { clearTimeout(hoverTimer); stopPreview(); });
+
+    // Touch: giữ nhẹ (long-press) để xem trước, chạm nhanh vẫn mở video đầy đủ
+    card.addEventListener('touchstart', () => {
+      card.dataset.suppressClick = '0';
+      longPressTimer = setTimeout(() => {
+        startPreview();
+        card.dataset.suppressClick = '1';
+      }, 400);
+    }, { passive:true });
+    card.addEventListener('touchmove', () => { clearTimeout(longPressTimer); });
+    card.addEventListener('touchend', () => {
+      clearTimeout(longPressTimer);
+      if(previewing) stopPreview();
     });
   }
 
